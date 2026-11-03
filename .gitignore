@@ -1,6 +1,6 @@
 *.exe
 test
 
-game-test/
+build/
 
 .vscode/
