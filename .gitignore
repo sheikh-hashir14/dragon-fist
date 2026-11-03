@@ -1,0 +1,6 @@
+*.exe
+test
+
+game-test/
+
+.vscode/
