@@ -1,5 +1,6 @@
 @echo off
 cd /d "%~dp0"
+set PATH=C:\msys64\ucrt64\bin;%PATH%
 if not exist "lib\raylib\include\raylib.h" (
   echo ERROR: raylib.h not found in %CD%\lib\raylib\include
   pause & exit /b 1
