@@ -3,6 +3,7 @@
 #include <math.h>
 #include <time.h>
 #include <stdbool.h>
+#include <resource_dir.h>
 
 #define SCREEN_W 1200
 #define SCREEN_H 600
@@ -409,7 +410,7 @@ int main()
   SetRandomSeed((unsigned int)time(NULL));
 
   // Force working directory to the directory where executable/assets reside using Raylib's ChangeDirectory
-  ChangeDirectory(GetApplicationDirectory());
+  SearchAndSetResourceDir("resources");
 
   // Load PNG Assets
   Texture2D texP1 = LoadTexture("viper.png");
