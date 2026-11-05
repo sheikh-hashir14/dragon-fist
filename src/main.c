@@ -3,11 +3,11 @@
 #include <math.h>
 #include <time.h>
 #include <stdbool.h>
-#include <resource_dir.h>
+#include "resource_dir.h"
 
-#define SCREEN_W 1200
-#define SCREEN_H 600
-#define GROUND_Y 500
+#define SCREEN_W 1600
+#define SCREEN_H 900
+#define GROUND_Y 750
 #define MOVE_SPEED 320.0f
 #define JUMP_SPEED 850.0f
 #define GRAVITY 2200.0f
@@ -69,8 +69,8 @@ typedef struct Input
 
 void ResetFighter(Fighter *f, float x, int facing)
 {
-  f->w = 60.0f;
-  f->h = 140.0f;
+  f->w = 120.0f;
+  f->h = 240.0f;
   f->x = x;
   f->y = GROUND_Y - f->h;
   f->vy = 0.0f;
@@ -393,6 +393,108 @@ void DrawCentered(const char *text, int y, int size, Color color)
   DrawText(text, SCREEN_W / 2 - MeasureText(text, size) / 2, y, size, color);
 }
 
+void DrawFieryText(Font font, const char *text, float size, float cx, float y, float time)
+{
+  float spacing = size / 8.0f;
+  Vector2 dim = MeasureTextEx(font, text, size, spacing);
+  Vector2 pos = {cx - dim.x / 2.0f, y};
+
+  float outline = size * 0.06f;
+  if (outline < 2.0f)
+    outline = 2.0f;
+  int depth = (int)(size * 0.10f);
+  if (depth < 2)
+    depth = 2;
+
+  DrawTextEx(font, text,
+             (Vector2){pos.x + depth + outline + 6.0f, pos.y + depth + outline + 6.0f},
+             size, spacing, Fade(BLACK, 0.6f));
+
+  for (int d = 0; d <= depth; d += 2)
+  {
+    for (int a = 0; a < 16; a++)
+    {
+      float ang = a * (2.0f * PI / 16.0f);
+      Vector2 p = {pos.x + d + cosf(ang) * outline, pos.y + d + sinf(ang) * outline};
+      DrawTextEx(font, text, p, size, spacing, BLACK);
+    }
+  }
+
+  for (int d = depth; d >= 1; d--)
+  {
+    float t = (float)d / (float)depth;
+    Color c = {(unsigned char)(160.0f * (1.0f - t) + 45.0f * t),
+               (unsigned char)(25.0f * (1.0f - t)),
+               0,
+               255};
+    DrawTextEx(font, text, (Vector2){pos.x + d, pos.y + d}, size, spacing, c);
+  }
+
+  static const Color bands[6] = {
+      {255, 255, 170, 255},
+      {255, 230, 0, 255},
+      {255, 170, 0, 255},
+      {255, 110, 0, 255},
+      {230, 40, 0, 255},
+      {170, 10, 10, 255}};
+
+  float bandH = dim.y / 6.0f;
+  for (int i = 0; i < 6; i++)
+  {
+    BeginScissorMode((int)pos.x - 40, (int)(pos.y + i * bandH), (int)dim.x + 80, (int)bandH + 1);
+    float wobble = sinf(time * 6.0f + i * 1.3f) * 1.5f;
+    DrawTextEx(font, text, (Vector2){pos.x + wobble, pos.y}, size, spacing, bands[i]);
+    EndScissorMode();
+  }
+}
+
+void DrawComputerIcon(float x, float y)
+{
+  DrawRectangle((int)x + 20, (int)y + 20, 76, 50, DARKGRAY);
+  DrawRectangle((int)x + 25, (int)y + 25, 66, 40, SKYBLUE);
+  DrawRectangle((int)x + 30, (int)y + 31, 30, 4, WHITE);
+  DrawRectangle((int)x + 30, (int)y + 40, 44, 4, WHITE);
+  DrawRectangle((int)x + 52, (int)y + 70, 12, 10, GRAY);
+  DrawRectangle((int)x + 38, (int)y + 80, 40, 6, GRAY);
+}
+
+void DrawFightersIcon(float x, float y)
+{
+  Color c = WHITE;
+
+  DrawCircle((int)x + 30, (int)y + 32, 8, c);
+  DrawLineEx((Vector2){x + 30, y + 40}, (Vector2){x + 30, y + 66}, 3.0f, c);
+  DrawLineEx((Vector2){x + 30, y + 48}, (Vector2){x + 56, y + 46}, 3.0f, c);
+  DrawLineEx((Vector2){x + 30, y + 48}, (Vector2){x + 18, y + 58}, 3.0f, c);
+  DrawLineEx((Vector2){x + 30, y + 66}, (Vector2){x + 20, y + 88}, 3.0f, c);
+  DrawLineEx((Vector2){x + 30, y + 66}, (Vector2){x + 42, y + 88}, 3.0f, c);
+
+  DrawCircle((int)x + 92, (int)y + 32, 8, c);
+  DrawLineEx((Vector2){x + 92, y + 40}, (Vector2){x + 92, y + 66}, 3.0f, c);
+  DrawLineEx((Vector2){x + 92, y + 48}, (Vector2){x + 66, y + 52}, 3.0f, c);
+  DrawLineEx((Vector2){x + 92, y + 48}, (Vector2){x + 104, y + 58}, 3.0f, c);
+  DrawLineEx((Vector2){x + 92, y + 66}, (Vector2){x + 82, y + 88}, 3.0f, c);
+  DrawLineEx((Vector2){x + 92, y + 66}, (Vector2){x + 104, y + 88}, 3.0f, c);
+
+  DrawCircle((int)x + 61, (int)y + 49, 4, YELLOW);
+}
+
+void DrawMenuButton(Rectangle r, const char *label, bool hovered, bool computerIcon)
+{
+  Color bg = hovered ? (Color){90, 40, 20, 255} : (Color){45, 20, 15, 255};
+  Color border = hovered ? YELLOW : ORANGE;
+
+  DrawRectangleRec(r, bg);
+  DrawRectangleLinesEx(r, 3.0f, border);
+
+  if (computerIcon)
+    DrawComputerIcon(r.x + 5, r.y + 2);
+  else
+    DrawFightersIcon(r.x + 5, r.y + 2);
+
+  DrawText(label, (int)r.x + 135, (int)r.y + 44, 22, hovered ? YELLOW : RAYWHITE);
+}
+
 Texture2D LoadBackgroundAsset(void)
 {
   Texture2D tex = LoadTexture("background.png");
@@ -405,22 +507,26 @@ Texture2D LoadBackgroundAsset(void)
 
 int main()
 {
-  InitWindow(SCREEN_W, SCREEN_H, "Street Brawler");
+  InitWindow(SCREEN_W, SCREEN_H, "Dragon Fist: Rise of the Warriors");
   SetTargetFPS(60);
   SetRandomSeed((unsigned int)time(NULL));
 
-  // Force working directory to the directory where executable/assets reside using Raylib's ChangeDirectory
   SearchAndSetResourceDir("resources");
 
-  // Load PNG Assets
   Texture2D texP1 = LoadTexture("viper.png");
   Texture2D texP2 = LoadTexture("kai.png");
   Texture2D texBg = LoadBackgroundAsset();
+
+  Font titleFont = GetFontDefault();
+  SetTextureFilter(titleFont.texture, TEXTURE_FILTER_POINT);
 
   Fighter p1 = {0};
   Fighter p2 = {0};
   ResetFighter(&p1, 250.0f, 1);
   ResetFighter(&p2, 890.0f, -1);
+
+  Rectangle btnCPU = {190.0f, 228.0f, 400.0f, 110.0f};
+  Rectangle btnPVP = {610.0f, 228.0f, 400.0f, 110.0f};
 
   GameState state = MENU;
   bool vsCPU = true;
@@ -436,7 +542,6 @@ int main()
     float dt = GetFrameTime();
     gameTime += dt;
 
-    // Press 'R' to reload background at runtime
     if (IsKeyPressed(KEY_R))
     {
       UnloadTexture(texBg);
@@ -445,15 +550,22 @@ int main()
 
     if (state == MENU)
     {
-      if (IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_TWO))
+      Vector2 mouse = GetMousePosition();
+      bool overCPU = CheckCollisionPointRec(mouse, btnCPU);
+      bool overPVP = CheckCollisionPointRec(mouse, btnPVP);
+
+      SetMouseCursor((overCPU || overPVP) ? MOUSE_CURSOR_POINTING_HAND : MOUSE_CURSOR_DEFAULT);
+
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && (overCPU || overPVP))
       {
-        vsCPU = IsKeyPressed(KEY_ONE);
+        vsCPU = overCPU;
         ResetFighter(&p1, 250.0f, 1);
         ResetFighter(&p2, 890.0f, -1);
         p1.wins = 0;
         p2.wins = 0;
         round = 1;
         roundTime = 60.0f;
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         state = FIGHT;
       }
     }
@@ -543,7 +655,6 @@ int main()
 
     BeginDrawing();
 
-    // Draw Stage Background (or gradient fallback if texture isn't loaded)
     if (texBg.id != 0)
     {
       DrawTexturePro(texBg, (Rectangle){0, 0, (float)texBg.width, (float)texBg.height},
@@ -557,15 +668,29 @@ int main()
 
     if (state == MENU)
     {
-      DrawRectangle(0, 0, SCREEN_W, SCREEN_H, Fade(BLACK, 0.45f));
-      DrawCentered("STREET BRAWLER", 110, 80, WHITE);
-      DrawCentered("Press 1 : Player vs CPU", 240, 36, YELLOW);
-      DrawCentered("Press 2 : Player vs Player", 290, 36, YELLOW);
+      DrawRectangle(0, 0, SCREEN_W, SCREEN_H, Fade(BLACK, 0.65f));
 
-      DrawCentered("P1:  A / D move   W jump   S block   F punch   G kick", 390, 26, RAYWHITE);
-      DrawCentered("P2:  Left / Right move   Up jump   Down block   . punch   / kick", 430, 26, RAYWHITE);
-      DrawCentered("First to win 2 rounds wins the match", 490, 24, LIGHTGRAY);
-      DrawCentered("Press 'R' anytime to reload background", 530, 20, ORANGE);
+      for (int sy = 0; sy < SCREEN_H; sy += 4)
+        DrawRectangle(0, sy, SCREEN_W, 1, Fade(BLACK, 0.25f));
+
+      float bob = sinf(gameTime * 2.0f) * 3.0f;
+      DrawFieryText(titleFont, "DRAGON FIST", 90.0f, SCREEN_W / 2.0f, 25.0f + bob, gameTime);
+      DrawFieryText(titleFont, "RISE OF THE WARRIORS", 38.0f, SCREEN_W / 2.0f, 135.0f + bob, gameTime + 1.0f);
+
+      int barW = 640;
+      int barX = SCREEN_W / 2 - barW / 2;
+      DrawRectangle(barX, 195, barW, 3, YELLOW);
+      DrawRectangle(barX, 200, barW, 3, ORANGE);
+      DrawRectangle(barX, 205, barW, 3, RED);
+
+      Vector2 mouse = GetMousePosition();
+      DrawMenuButton(btnCPU, "VS COMPUTER", CheckCollisionPointRec(mouse, btnCPU), true);
+      DrawMenuButton(btnPVP, "PLAYER VS PLAYER", CheckCollisionPointRec(mouse, btnPVP), false);
+
+      DrawCentered("P1:  A / D move   W jump   S block   F punch   G kick", 375, 24, RAYWHITE);
+      DrawCentered("P2:  Left / Right move   Up jump   Down block   . punch   / kick", 410, 24, RAYWHITE);
+      DrawCentered("First to win 2 rounds wins the match", 470, 22, LIGHTGRAY);
+      DrawCentered("Press 'R' anytime to reload background", 520, 20, ORANGE);
     }
     else
     {
