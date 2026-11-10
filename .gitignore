@@ -1,3 +1,7 @@
 dist/
 build/
-src/main
+*.exe
+dragon-fist
+dragonfist.exe
+main.exe
+src/*.exe
