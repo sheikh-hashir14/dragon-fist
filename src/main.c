@@ -393,73 +393,254 @@ void DrawCentered(const char *text, int y, int size, Color color)
   DrawText(text, SCREEN_W / 2 - MeasureText(text, size) / 2, y, size, color);
 }
 
-void DrawFieryText(Font font, const char *text, float size, float cx, float y, float time)
+Color LogoLerp(Color a, Color b, float t)
 {
-  float spacing = size / 8.0f;
-  Vector2 dim = MeasureTextEx(font, text, size, spacing);
-  Vector2 pos = {cx - dim.x / 2.0f, y};
+  return (Color){(unsigned char)(a.r + (b.r - a.r) * t),
+                 (unsigned char)(a.g + (b.g - a.g) * t),
+                 (unsigned char)(a.b + (b.b - a.b) * t),
+                 255};
+}
 
-  float outline = size * 0.06f;
-  if (outline < 2.0f)
-    outline = 2.0f;
-  int depth = (int)(size * 0.10f);
-  if (depth < 2)
-    depth = 2;
+void DrawCornerOrnament(float x, float y, float sx, float sy)
+{
+  Color gold = {184, 134, 11, 255};
+  Color bronze = {120, 80, 10, 255};
 
-  DrawTextEx(font, text,
-             (Vector2){pos.x + depth + outline + 6.0f, pos.y + depth + outline + 6.0f},
-             size, spacing, Fade(BLACK, 0.6f));
+  DrawLineEx((Vector2){x, y}, (Vector2){x + sx * 120.0f, y}, 5.0f, gold);
+  DrawLineEx((Vector2){x, y}, (Vector2){x, y + sy * 120.0f}, 5.0f, gold);
 
-  for (int d = 0; d <= depth; d += 2)
+  DrawLineEx((Vector2){x + sx * 14.0f, y + sy * 14.0f}, (Vector2){x + sx * 90.0f, y + sy * 14.0f}, 3.0f, bronze);
+  DrawLineEx((Vector2){x + sx * 14.0f, y + sy * 14.0f}, (Vector2){x + sx * 14.0f, y + sy * 90.0f}, 3.0f, bronze);
+
+  float qx = sx > 0.0f ? x + 24.0f : x - 24.0f - 30.0f;
+  float qy = sy > 0.0f ? y + 24.0f : y - 24.0f - 30.0f;
+  DrawRectangleLinesEx((Rectangle){qx, qy, 30.0f, 30.0f}, 4.0f, gold);
+
+  DrawCircleLines((int)(x + sx * 78.0f), (int)(y + sy * 34.0f), 9.0f, gold);
+  DrawCircleLines((int)(x + sx * 34.0f), (int)(y + sy * 78.0f), 9.0f, gold);
+  DrawLineEx((Vector2){x + sx * 56.0f, y + sy * 24.0f}, (Vector2){x + sx * 70.0f, y + sy * 46.0f}, 3.0f, gold);
+  DrawLineEx((Vector2){x + sx * 24.0f, y + sy * 56.0f}, (Vector2){x + sx * 46.0f, y + sy * 70.0f}, 3.0f, gold);
+}
+
+void DrawFist(float cx, float cy)
+{
+  Color outline = {110, 30, 0, 255};
+
+  DrawCircleGradient((int)cx, (int)cy, 150.0f, Fade(YELLOW, 0.95f), Fade(ORANGE, 0.0f));
+
+  DrawRectangleRounded((Rectangle){cx - 66, cy - 10, 132, 78}, 0.3f, 8, outline);
+  DrawRectangleRounded((Rectangle){cx - 60, cy - 4, 120, 66}, 0.3f, 8, ORANGE);
+
+  for (int i = 0; i < 4; i++)
   {
-    for (int a = 0; a < 16; a++)
+    float kx = cx - 60.0f + i * 30.0f;
+    DrawRectangleRounded((Rectangle){kx - 2, cy - 48, 32, 56}, 0.5f, 8, outline);
+    DrawRectangleRounded((Rectangle){kx + 1, cy - 45, 26, 50}, 0.5f, 8, i % 2 ? GOLD : (Color){255, 190, 40, 255});
+    DrawRectangleRounded((Rectangle){kx + 5, cy - 41, 18, 16}, 0.6f, 6, Fade(YELLOW, 0.8f));
+  }
+
+  DrawRectangleRounded((Rectangle){cx - 4, cy + 22, 70, 36}, 0.5f, 8, outline);
+  DrawRectangleRounded((Rectangle){cx, cy + 25, 62, 30}, 0.5f, 8, (Color){255, 140, 20, 255});
+
+  DrawRectangleRounded((Rectangle){cx - 52, cy + 8, 100, 14}, 0.6f, 6, Fade(RED, 0.35f));
+}
+
+void DrawDragonFistLogo(float time)
+{
+  static float ex[28];
+  static float ey[28];
+  static float es[28];
+  static float ep[28];
+  static bool init = false;
+
+  if (!init)
+  {
+    for (int i = 0; i < 28; i++)
     {
-      float ang = a * (2.0f * PI / 16.0f);
-      Vector2 p = {pos.x + d + cosf(ang) * outline, pos.y + d + sinf(ang) * outline};
-      DrawTextEx(font, text, p, size, spacing, BLACK);
+      ex[i] = (float)GetRandomValue(0, SCREEN_W);
+      ey[i] = (float)GetRandomValue(0, SCREEN_H);
+      es[i] = 20.0f + (float)GetRandomValue(0, 40);
+      ep[i] = (float)GetRandomValue(0, 1000) / 1000.0f * 6.0f;
     }
+    init = true;
   }
 
-  for (int d = depth; d >= 1; d--)
+  DrawRectangleGradientV(0, 0, SCREEN_W, SCREEN_H, (Color){10, 16, 48, 255}, (Color){4, 4, 8, 255});
+
+  DrawCornerOrnament(20.0f, 20.0f, 1.0f, 1.0f);
+  DrawCornerOrnament(SCREEN_W - 20.0f, 20.0f, -1.0f, 1.0f);
+  DrawCornerOrnament(20.0f, SCREEN_H - 20.0f, 1.0f, -1.0f);
+  DrawCornerOrnament(SCREEN_W - 20.0f, SCREEN_H - 20.0f, -1.0f, -1.0f);
+
+  float cx = SCREEN_W / 2.0f;
+  float pulse = sinf(time * 3.0f) * 14.0f;
+
+  DrawCircleGradient((int)cx, 195, 440.0f + pulse, Fade(RED, 0.35f), Fade(MAROON, 0.0f));
+  DrawCircleGradient((int)cx, 190, 330.0f + pulse, Fade(ORANGE, 0.45f), Fade(RED, 0.0f));
+  DrawCircleGradient((int)cx, 185, 220.0f + pulse * 0.6f, Fade(YELLOW, 0.50f), Fade(ORANGE, 0.0f));
+
+  DrawFist(cx, 92.0f);
+
+  const char *title = "DRAGON FIST";
+  int size = 110;
+  int w = MeasureText(title, size);
+  int tx = (int)(cx - w / 2.0f);
+  int ty = 150;
+
+  for (int d = 14; d >= 8; d--)
+    DrawText(title, tx + d, ty + d, size, BLACK);
+
+  for (int d = 8; d >= 1; d--)
+    DrawText(title, tx + d, ty + d, size, MAROON);
+
+  for (int a = 0; a < 16; a++)
   {
-    float t = (float)d / (float)depth;
-    Color c = {(unsigned char)(160.0f * (1.0f - t) + 45.0f * t),
-               (unsigned char)(25.0f * (1.0f - t)),
-               0,
-               255};
-    DrawTextEx(font, text, (Vector2){pos.x + d, pos.y + d}, size, spacing, c);
+    float ang = a * (2.0f * PI / 16.0f);
+    DrawText(title, tx + (int)(cosf(ang) * 5.0f), ty + (int)(sinf(ang) * 5.0f), size, BLACK);
   }
 
-  static const Color bands[6] = {
-      {255, 255, 170, 255},
-      {255, 230, 0, 255},
-      {255, 170, 0, 255},
-      {255, 110, 0, 255},
-      {230, 40, 0, 255},
-      {170, 10, 10, 255}};
-
-  float bandH = dim.y / 6.0f;
-  for (int i = 0; i < 6; i++)
+  for (int a = 0; a < 16; a++)
   {
-    BeginScissorMode((int)pos.x - 40, (int)(pos.y + i * bandH), (int)dim.x + 80, (int)bandH + 1);
-    float wobble = sinf(time * 6.0f + i * 1.3f) * 1.5f;
-    DrawTextEx(font, text, (Vector2){pos.x + wobble, pos.y}, size, spacing, bands[i]);
+    float ang = a * (2.0f * PI / 16.0f);
+    DrawText(title, tx + (int)(cosf(ang) * 3.0f), ty + (int)(sinf(ang) * 3.0f), size, RED);
+  }
+
+  const int bands = 10;
+  float bandH = (float)size / bands;
+  for (int i = 0; i < bands; i++)
+  {
+    float t = (float)i / (bands - 1);
+    Color c = LogoLerp(YELLOW, ORANGE, t);
+    BeginScissorMode(tx - 20, ty + (int)(i * bandH), w + 40, (int)bandH + 1);
+    DrawText(title, tx, ty, size, c);
     EndScissorMode();
+  }
+
+  float bx = 420.0f;
+  float by = 280.0f;
+  float bw = 760.0f;
+  float bh = 70.0f;
+  Color gold = {184, 134, 11, 255};
+
+  DrawRectangle((int)bx, (int)by, (int)bw, (int)bh, (Color){48, 48, 54, 255});
+  DrawLineEx((Vector2){bx, by + 3}, (Vector2){bx + bw, by + 3}, 5.0f, gold);
+  DrawLineEx((Vector2){bx, by + bh - 3}, (Vector2){bx + bw, by + bh - 3}, 5.0f, gold);
+  DrawLineEx((Vector2){bx, by + 10}, (Vector2){bx + bw, by + 10}, 2.0f, (Color){120, 80, 10, 255});
+  DrawLineEx((Vector2){bx, by + bh - 10}, (Vector2){bx + bw, by + bh - 10}, 2.0f, (Color){120, 80, 10, 255});
+
+  DrawRectangleGradientH((int)bx - 38, (int)by - 12, 38, (int)bh + 24, GRAY, BLACK);
+  DrawRectangleGradientH((int)(bx + bw), (int)by - 12, 38, (int)bh + 24, BLACK, GRAY);
+  DrawRectangle((int)bx - 42, (int)by - 18, 46, 8, gold);
+  DrawRectangle((int)bx - 42, (int)(by + bh + 10), 46, 8, gold);
+  DrawRectangle((int)(bx + bw) - 4, (int)by - 18, 46, 8, gold);
+  DrawRectangle((int)(bx + bw) - 4, (int)(by + bh + 10), 46, 8, gold);
+
+  const char *sub = "RISE OF WARRIOR";
+  int ss = 44;
+  int sx = (int)(cx - MeasureText(sub, ss) / 2.0f);
+  int sy = (int)(by + (bh - ss) / 2.0f);
+  DrawText(sub, sx + 2, sy + 2, ss, BLACK);
+  DrawText(sub, sx, sy, ss, (Color){245, 235, 205, 255});
+
+  for (int i = 0; i < 28; i++)
+  {
+    float py = fmodf(ey[i] - time * es[i], (float)SCREEN_H);
+    if (py < 0.0f)
+      py += SCREEN_H;
+    float px = ex[i] + sinf(time * 1.5f + ep[i]) * 14.0f;
+    float a = 0.6f + 0.4f * sinf(time * 4.0f + ep[i]);
+    int sz = 2 + (i % 3) * 2;
+    DrawRectangle((int)px, (int)py, sz, sz, Fade(i % 2 ? YELLOW : ORANGE, a));
   }
 }
 
 void DrawComputerIcon(float x, float y)
 {
-  DrawRectangle((int)x + 20, (int)y + 20, 76, 50, DARKGRAY);
-  DrawRectangle((int)x + 25, (int)y + 25, 66, 40, SKYBLUE);
-  DrawRectangle((int)x + 30, (int)y + 31, 30, 4, WHITE);
-  DrawRectangle((int)x + 30, (int)y + 40, 44, 4, WHITE);
-  DrawRectangle((int)x + 52, (int)y + 70, 12, 10, GRAY);
-  DrawRectangle((int)x + 38, (int)y + 80, 40, 6, GRAY);
+  Color beige = {206, 196, 165, 255};
+  Color beigeDark = {160, 150, 120, 255};
+  Color beigeLight = {228, 220, 192, 255};
+  Color keyCol = {238, 232, 210, 255};
+  Color phosphor = {150, 255, 170, 255};
+
+  DrawEllipse((int)x + 58, (int)y + 102, 56, 4, Fade(BLACK, 0.35f));
+
+  DrawRectangleRounded((Rectangle){x + 11, y + 7, 84, 64}, 0.12f, 6, beigeDark);
+  DrawRectangleRounded((Rectangle){x + 8, y + 4, 84, 64}, 0.12f, 6, beige);
+  DrawRectangleRounded((Rectangle){x + 10, y + 5, 80, 14}, 0.4f, 6, Fade(beigeLight, 0.6f));
+
+  DrawRectangleRounded((Rectangle){x + 14, y + 10, 72, 46}, 0.1f, 6, (Color){45, 42, 36, 255});
+  DrawRectangleRounded((Rectangle){x + 17, y + 13, 66, 40}, 0.18f, 8, (Color){8, 28, 20, 255});
+  DrawRectangleGradientV((int)x + 19, (int)y + 16, 62, 34, (Color){40, 120, 80, 255}, (Color){10, 40, 28, 255});
+
+  DrawText("C:\\>DIR", (int)x + 23, (int)y + 19, 8, phosphor);
+  DrawRectangle((int)x + 23, (int)y + 30, 34, 2, Fade(phosphor, 0.8f));
+  DrawRectangle((int)x + 23, (int)y + 35, 46, 2, Fade(phosphor, 0.8f));
+  DrawRectangle((int)x + 23, (int)y + 40, 28, 2, Fade(phosphor, 0.8f));
+  DrawText("C:\\>_", (int)x + 23, (int)y + 44, 8, phosphor);
+
+  for (int sy = 16; sy < 50; sy += 3)
+    DrawRectangle((int)x + 19, (int)y + sy, 62, 1, Fade(BLACK, 0.3f));
+
+  DrawTriangle((Vector2){x + 19, y + 16}, (Vector2){x + 19, y + 36}, (Vector2){x + 45, y + 16}, Fade(WHITE, 0.12f));
+
+  DrawRectangle((int)x + 14, (int)y + 59, 26, 4, beigeDark);
+  DrawRectangle((int)x + 16, (int)y + 60, 22, 2, GRAY);
+  DrawCircle((int)x + 62, (int)y + 61, 3, beigeDark);
+  DrawCircle((int)x + 70, (int)y + 61, 3, beigeDark);
+  DrawCircle((int)x + 80, (int)y + 61, 3, Fade(LIME, 0.35f));
+  DrawCircle((int)x + 80, (int)y + 61, 2, LIME);
+
+  DrawRectangle((int)x + 32, (int)y + 68, 36, 6, beigeDark);
+  DrawRectangleRounded((Rectangle){x + 20, y + 73, 60, 6}, 0.5f, 6, beige);
+  DrawRectangle((int)x + 22, (int)y + 78, 56, 1, beigeDark);
+
+  DrawRectangleRounded((Rectangle){x + 100, y + 16, 20, 62}, 0.1f, 4, beigeDark);
+  DrawRectangleRounded((Rectangle){x + 97, y + 13, 20, 62}, 0.1f, 4, beige);
+  for (int i = 0; i < 2; i++)
+  {
+    DrawRectangle((int)x + 100, (int)y + 18 + i * 14, 14, 9, beigeDark);
+    DrawRectangle((int)x + 101, (int)y + 22 + i * 14, 12, 2, BLACK);
+    DrawRectangle((int)x + 109, (int)y + 25 + i * 14, 3, 2, GRAY);
+  }
+  DrawCircle((int)x + 107, (int)y + 50, 4, beigeDark);
+  DrawCircle((int)x + 107, (int)y + 50, 2, GRAY);
+  DrawCircle((int)x + 101, (int)y + 58, 2, RED);
+  DrawCircle((int)x + 101, (int)y + 63, 2, LIME);
+  for (int i = 0; i < 4; i++)
+    DrawRectangle((int)x + 105, (int)y + 59 + i * 3, 9, 1, beigeDark);
+
+  DrawRectangleRounded((Rectangle){x + 5, y + 85, 88, 16}, 0.25f, 6, beigeDark);
+  DrawRectangleRounded((Rectangle){x + 4, y + 83, 88, 15}, 0.25f, 6, beige);
+  for (int i = 0; i < 12; i++)
+    DrawRectangle((int)x + 8 + i * 7, (int)y + 86, 5, 3, keyCol);
+  for (int i = 0; i < 11; i++)
+    DrawRectangle((int)x + 11 + i * 7, (int)y + 91, 5, 3, keyCol);
+  DrawRectangle((int)x + 22, (int)y + 95, 40, 2, keyCol);
 }
 
-void DrawFightersIcon(float x, float y)
+void DrawSpriteIcon(Texture2D tex, Rectangle slot, bool flip)
 {
+  float fw = (float)tex.width / 7.0f;
+  float fh = (float)tex.height / 7.0f;
+  float s = fminf(slot.width / fw, slot.height / fh);
+  float dw = fw * s;
+  float dh = fh * s;
+
+  Rectangle src = {0.0f, 0.0f, flip ? -fw : fw, fh};
+  Rectangle dst = {slot.x + (slot.width - dw) / 2.0f, slot.y + slot.height - dh, dw, dh};
+  DrawTexturePro(tex, src, dst, (Vector2){0, 0}, 0.0f, WHITE);
+}
+
+void DrawFightersIcon(float x, float y, Texture2D leftTex, Texture2D rightTex)
+{
+  if (leftTex.id != 0 && rightTex.id != 0)
+  {
+    DrawSpriteIcon(leftTex, (Rectangle){x, y, 62.0f, 100.0f}, false);
+    DrawSpriteIcon(rightTex, (Rectangle){x + 56.0f, y, 62.0f, 100.0f}, true);
+    DrawCircle((int)x + 59, (int)y + 45, 4, YELLOW);
+    return;
+  }
+
   Color c = WHITE;
 
   DrawCircle((int)x + 30, (int)y + 32, 8, c);
@@ -479,7 +660,7 @@ void DrawFightersIcon(float x, float y)
   DrawCircle((int)x + 61, (int)y + 49, 4, YELLOW);
 }
 
-void DrawMenuButton(Rectangle r, const char *label, bool hovered, bool computerIcon)
+void DrawMenuButton(Rectangle r, const char *label, bool hovered, bool computerIcon, Texture2D leftTex, Texture2D rightTex)
 {
   Color bg = hovered ? (Color){90, 40, 20, 255} : (Color){45, 20, 15, 255};
   Color border = hovered ? YELLOW : ORANGE;
@@ -490,9 +671,47 @@ void DrawMenuButton(Rectangle r, const char *label, bool hovered, bool computerI
   if (computerIcon)
     DrawComputerIcon(r.x + 5, r.y + 2);
   else
-    DrawFightersIcon(r.x + 5, r.y + 2);
+    DrawFightersIcon(r.x + 5, r.y + 2, leftTex, rightTex);
 
   DrawText(label, (int)r.x + 135, (int)r.y + 44, 22, hovered ? YELLOW : RAYWHITE);
+}
+
+void DrawControlsPanel(Rectangle r)
+{
+  static const char *p1Keys[5] = {"A / D", "W", "S", "F", "G"};
+  static const char *p2Keys[5] = {"Left / Right", "Up", "Down", ".", "/"};
+  static const char *actions[5] = {"Move", "Jump", "Block", "Punch", "Kick"};
+
+  int tx = (int)r.x + 20;
+  int ax = (int)r.x + 190;
+  int y = (int)r.y + 16;
+
+  DrawRectangleRec(r, Fade(BLACK, 0.55f));
+  DrawRectangleLinesEx(r, 3.0f, ORANGE);
+
+  DrawText("CONTROLS", tx, y, 28, YELLOW);
+  y += 40;
+  DrawRectangle(tx, y, (int)r.width - 40, 2, ORANGE);
+  y += 14;
+
+  DrawText("PLAYER 1", tx, y, 22, SKYBLUE);
+  y += 32;
+  for (int i = 0; i < 5; i++)
+  {
+    DrawText(p1Keys[i], tx, y, 20, RAYWHITE);
+    DrawText(actions[i], ax, y, 20, LIGHTGRAY);
+    y += 26;
+  }
+
+  y += 14;
+  DrawText("PLAYER 2", tx, y, 22, SKYBLUE);
+  y += 32;
+  for (int i = 0; i < 5; i++)
+  {
+    DrawText(p2Keys[i], tx, y, 20, RAYWHITE);
+    DrawText(actions[i], ax, y, 20, LIGHTGRAY);
+    y += 26;
+  }
 }
 
 Texture2D LoadBackgroundAsset(void)
@@ -525,8 +744,18 @@ int main()
   ResetFighter(&p1, 250.0f, 1);
   ResetFighter(&p2, 890.0f, -1);
 
-  Rectangle btnCPU = {190.0f, 228.0f, 400.0f, 110.0f};
-  Rectangle btnPVP = {610.0f, 228.0f, 400.0f, 110.0f};
+  const float btnW = 400.0f;
+  const float btnH = 110.0f;
+  const float btnGap = 40.0f;
+  const float btnStartX = (SCREEN_W - (btnW * 2.0f + btnGap)) / 2.0f;
+  const float btnY = (SCREEN_H - btnH) / 2.0f;
+
+  Rectangle btnCPU = {btnStartX, btnY, btnW, btnH};
+  Rectangle btnPVP = {btnStartX + btnW + btnGap, btnY, btnW, btnH};
+
+  const float panelW = 320.0f;
+  const float panelH = 420.0f;
+  Rectangle controlsPanel = {30.0f, (SCREEN_H - panelH) / 2.0f, panelW, panelH};
 
   GameState state = MENU;
   bool vsCPU = true;
@@ -673,24 +902,16 @@ int main()
       for (int sy = 0; sy < SCREEN_H; sy += 4)
         DrawRectangle(0, sy, SCREEN_W, 1, Fade(BLACK, 0.25f));
 
-      float bob = sinf(gameTime * 2.0f) * 3.0f;
-      DrawFieryText(titleFont, "DRAGON FIST", 90.0f, SCREEN_W / 2.0f, 25.0f + bob, gameTime);
-      DrawFieryText(titleFont, "RISE OF THE WARRIORS", 38.0f, SCREEN_W / 2.0f, 135.0f + bob, gameTime + 1.0f);
-
-      int barW = 640;
-      int barX = SCREEN_W / 2 - barW / 2;
-      DrawRectangle(barX, 195, barW, 3, YELLOW);
-      DrawRectangle(barX, 200, barW, 3, ORANGE);
-      DrawRectangle(barX, 205, barW, 3, RED);
+      DrawDragonFistLogo(gameTime);
 
       Vector2 mouse = GetMousePosition();
-      DrawMenuButton(btnCPU, "VS COMPUTER", CheckCollisionPointRec(mouse, btnCPU), true);
-      DrawMenuButton(btnPVP, "PLAYER VS PLAYER", CheckCollisionPointRec(mouse, btnPVP), false);
+      DrawMenuButton(btnCPU, "VS COMPUTER", CheckCollisionPointRec(mouse, btnCPU), true, texP1, texP2);
+      DrawMenuButton(btnPVP, "PLAYER VS PLAYER", CheckCollisionPointRec(mouse, btnPVP), false, texP1, texP2);
 
-      DrawCentered("P1:  A / D move   W jump   S block   F punch   G kick", 375, 24, RAYWHITE);
-      DrawCentered("P2:  Left / Right move   Up jump   Down block   . punch   / kick", 410, 24, RAYWHITE);
-      DrawCentered("First to win 2 rounds wins the match", 470, 22, LIGHTGRAY);
-      DrawCentered("Press 'R' anytime to reload background", 520, 20, ORANGE);
+      DrawControlsPanel(controlsPanel);
+
+      DrawCentered("First to win 2 rounds wins the match", SCREEN_H - 90, 22, LIGHTGRAY);
+      DrawCentered("Press 'R' anytime to reload background", SCREEN_H - 55, 20, ORANGE);
     }
     else
     {
