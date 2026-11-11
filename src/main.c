@@ -408,7 +408,7 @@ int main()
   InitWindow(SCREEN_W, SCREEN_H, "Street Brawler");
   SetTargetFPS(60);
   SetRandomSeed((unsigned int)time(NULL));
-
+ 
   // Force working directory to the directory where executable/assets reside using Raylib's ChangeDirectory
   SearchAndSetResourceDir("resources");
 
@@ -422,7 +422,7 @@ int main()
   ResetFighter(&p1, 250.0f, 1);
   ResetFighter(&p2, 890.0f, -1);
 
-  GameState state = MENU;
+  GameState state = MENU; 
   bool vsCPU = true;
   int round = 1;
   float roundTime = 60.0f;
