@@ -730,6 +730,7 @@ int main()
   SetTargetFPS(60);
   SetRandomSeed((unsigned int)time(NULL));
 
+  // Force working directory to the directory where executable/assets reside using Raylib's ChangeDirectory
   SearchAndSetResourceDir("resources");
 
   Texture2D texP1 = LoadTexture("viper.png");
@@ -757,7 +758,7 @@ int main()
   const float panelH = 420.0f;
   Rectangle controlsPanel = {30.0f, (SCREEN_H - panelH) / 2.0f, panelW, panelH};
 
-  GameState state = MENU;
+  GameState state = MENU; 
   bool vsCPU = true;
   int round = 1;
   float roundTime = 60.0f;
