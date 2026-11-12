@@ -16,7 +16,7 @@ Our goal with **Dragon Fist: Rise of Warriors** is to turn our nostalgia for cla
 ## Core Features
 
 * **Interactive Main Menu:** Navigate between game modes, view controls, and start matches seamlessly.
-* **Playable Roster & Special Powers:** Choose from three distinct fighters, each equipped with a unique special ability.
+* **Playable Roster:** Choose from three distinct fighters.
 * **Responsive Movement:** Full support for walking, jumping, blocking, and automatic opponent facing.
 * **Combat Mechanics:** Fluid punches and kicks featuring attack timing, damage calculation, knockback physics, and hitbox collision detection.
 * **Multiple Game Modes:**
