@@ -1,6 +1,6 @@
 # Dragon Fist: Rise of Warriors
 
-A 2D arcade-style fighting game built in **C** using the **Raylib** graphics library. Inspired by classic fighters like *Street Fighter*, this project brings fast-paced combat, unique character abilities, and local multiplayer action to the desktop.
+A 2D arcade-style fighting game built in **C** using the **Raylib** graphics library. Inspired by classic fighters like *Street Fighter*, this project brings fast-paced combat, and local multiplayer action to the desktop.
 
 ---
 
