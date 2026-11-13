@@ -4,6 +4,20 @@ A 2D arcade-style fighting game built in **C** using the **Raylib** graphics lib
 
 ---
 
+## How to Run
+
+To run the game, follow the given Steps in order:
+
+1. Download the game as a Zip file via the _green_ **Code** button
+2. Unzip the File from your **Downloads** Folder
+3. Open the folder that was created, named **dragon-fist-main**
+4. Double click to run **build.bat** file (build.sh for Linux Users) 
+5. Once it displays the Success Message, press any key to Close it.
+6. Open **dist** folder from within the **dragon-fist-main** folder
+7. Run the file **dragon-fist.exe**
+8. Enjoy your game!
+
+---
 ## Motivation
 
 Our goal with **Dragon Fist: Rise of Warriors** is to turn our nostalgia for classic arcade fighting games into hands-on software development experience. Through this project, we aim to:
